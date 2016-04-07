@@ -17,7 +17,7 @@ var uuid = require("node-uuid");
 var myuuid = uuid.v1();
 
 global.me = { "m_count":0,"uuid": myuuid , "want":{} };
-global.messages = {"count":0, "messages":[]}
+global.inbox = {"count":0, "messages":[]}
 global.peers = {"count":0, "peers":[]};
 
 // set up our express application
