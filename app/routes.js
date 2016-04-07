@@ -54,11 +54,11 @@ module.exports = function(app) {
 
 
 
-        messages.messages[messages.count] = message;
-        messages.count = messages.count + 1;
+        inbox.messages[inbox.count] = message;
+        inbox.count = inbox.count + 1;
 
 
-        console.log(messages);
+        console.log(inbox);
         console.log(me.want);
 
         res.redirect('/');
@@ -131,12 +131,12 @@ module.exports = function(app) {
           console.log(good);
 
           if(good){
-            messages.messages[messages.count] = message.Rumor;
-            messages.count = messages.count + 1;
+            inbox.messages[inbox.count] = message.Rumor;
+            inbox.count = inbox.count + 1;
             me.want[uuid] = sn;
           }
 
-          console.log(messages);
+          console.log(inbox);
           console.log(me);
 
           var found = false;
