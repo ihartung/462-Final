@@ -13,6 +13,7 @@ module.exports = function(app) {
           res.render('profile.ejs',{
               user_name: me.user_name,
               list: messages
+              users: peers
           });
         }
         else res.render('index.ejs'); // load the index.ejs file
