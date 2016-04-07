@@ -12,7 +12,7 @@ module.exports = function(app) {
         if('user_name' in me) {
           res.render('profile.ejs',{
               user_name: me.user_name,
-              list: messages
+              list: inbox
               users: peers
           });
         }
