@@ -19,8 +19,10 @@ module.exports = function(app) {
         else res.render('index.ejs'); // load the index.ejs file
     });
 
+_______________________________________________________________________________________
 
-    app.post('/', function(req, res) {
+
+  app.post('/', function(req, res) {
 
         console.log("post/");
 
@@ -40,6 +42,8 @@ module.exports = function(app) {
         res.redirect('/');
 
     });
+
+_______________________________________________________________________________________
 
     //add local message
     app.post('/local/message', function(req, res){
@@ -65,7 +69,7 @@ module.exports = function(app) {
     });
 
 
-
+_______________________________________________________________________________________
 
     //add message from other peer
     app.post('/message', function(req, res){
@@ -180,6 +184,8 @@ module.exports = function(app) {
 
     });
 
+_______________________________________________________________________________________
+
     //add a peer
     app.post('/peer', function(req, res){
         //var u = req.body.peer;
@@ -197,6 +203,8 @@ module.exports = function(app) {
         res.redirect('/');
 
     });
+
+_______________________________________________________________________________________
 
     //send a request
     app.post('/request/send', function(req, res){
@@ -221,6 +229,8 @@ module.exports = function(app) {
         res.redirect('/');
 
     });
+
+  _______________________________________________________________________________________
 
     //receive a request
     app.post('/request/receive', function(req, res){
