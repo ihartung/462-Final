@@ -19,6 +19,7 @@ var myuuid = uuid.v1();
 global.me = { "m_count":0,"uuid": myuuid , "want":{} };
 global.inbox = {"count":0, "messages":[]}
 global.peers = {"count":0, "peers":[]};
+global.requests = {"count":0, "contacts":[]};
 
 // set up our express application
 app.use(morgan('dev')); // log every request to the console

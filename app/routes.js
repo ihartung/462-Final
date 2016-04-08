@@ -198,6 +198,47 @@ module.exports = function(app) {
 
     });
 
+    //send a request
+    app.post('/request/send', function(req, res){
+        //var u = req.body.peer;
+        console.log("post/request");
+
+        var url = JSON.stringify(req.body.peer).replace(/\"/g, "");
+        var mu = "http://" + url;
+
+        var req = {"url":me.url, "name", me.user_name};
+
+        request.post(mu,{
+    			headers: {'content-type' : 'application/json'},
+    			form : {request : req}
+    					}, function(error, response, body){
+    						console.log(error);
+    					  console.log(body);
+    			});
+
+        console.log(peers);
+
+        res.redirect('/');
+
+    });
+
+    //receive a request
+    app.post('/request/receive', function(req, res){
+        //var u = req.body.peer;
+        console.log("post/request");
+
+        var request = req.body.request;
+
+        requests.contacts[requests.count] = request;
+        requests.count = requests.count + 1;
+
+
+        res.redirect('/');
+
+    });
+
+
+
 
 
 };
