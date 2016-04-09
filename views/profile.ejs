@@ -19,24 +19,41 @@
 
                console.log("hello world");
 
-               var messages = <%-JSON.stringify(list)%>;
+               var inbox = <%-JSON.stringify(list)%>;
+               var peers = <%-JSON.stringify(users)%>;
 
-               if(messages.count != 0){
+                if(inbox.count != 0){
+                    $('#msgDiv').html("<h4>Messages</h4>");
+                    var msgMap = {};
+                    for (i = 0; i < inbox.count; i++){
+                        var m = inbox.messages[i];
+                        msgMap[m.Time] = m;
+                    }
 
-                 for(i = 0; i < messages.count; i++){
+                    var keys = Object.keys(msgMap);
+                    keys = keys.sort();
+                    for(i = 0; i < keys.length; i++){
 
-                 var m = messages.messages[i];
+                        var m = msgMap[keys[i]];
+                        var comments = m.Comments;
 
-                      if(i==0){
-                        $('#stage').html("<p>" + m.Originator + " : " + m.Text + " </p>");
-                      }
-                      else{
-                        $('#stage').append("<br><p>" + m.Originator + " : " + m.Text + " </p>");
-                      }
+                        $('#msgDiv').append("<p>(" + (i+1) + ") " + m.Originator + " : " + m.Text + "</p>");
+                        for (j = 0; j < comments.length; j++){
+                            $('#msgDiv').append("<p style=\"margin-left: 40px\">" + comments[j].Originator + " : " + comments[j].Comment + "</p>");
+                        }
 
-                 }
+                    }
 
-               }
+                }
+
+                if(peers.count != 0){
+                    $('#peersDiv').html("<h4>Peers</h4>");
+                    var peerMap = {};
+                    for (i = 0; i < peers.count; i++){
+                        var p = peers.peers[i];
+                        $('#peersDiv').append("<p>" + i + "</p>");
+                    }
+                }
 
          });
 
@@ -72,9 +89,12 @@
                     </form>
                     <br>
                     <br>
-                    <div id = "stage">
+                    <div id = "msgDiv">
                      No messages :(.
-                     </div>
+                    </div>
+                    <div id = "peerDiv">
+                        No peers :(.
+                    </div>
 
             </div>
         </div>

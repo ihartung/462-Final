@@ -12,7 +12,7 @@ module.exports = function(app) {
         if('user_name' in me) {
           res.render('profile.ejs',{
               user_name: me.user_name,
-              list: inbox
+              list: inbox,
               users: peers
           });
         }
@@ -48,14 +48,37 @@ module.exports = function(app) {
         console.log("post/local/message");
 
         var messageid = me.uuid + ":" + me.m_count;
-        var message = {"MessageID":messageid, "Originator": me.user_name, "Text": req.body.message}
-        me.want[me.uuid] = me.m_count;
-        me.m_count = me.m_count + 1;
+        var d = new Date();
+        var str = req.body.message;
+        var split = str.split(':');
+        console.log(split);
+        if(split[0] == 'comment'){
+          var index = split[1];
+          var msgMap = {};
+          for (i = 0; i < inbox.count; i++){
+              var m = inbox.messages[i];
+              msgMap[m.Time] = m;
+          }
+
+          var keys = Object.keys(msgMap);
+          keys = keys.sort();
+          var m = msgMap[keys[index-1]];
+          for (i = 0; i < inbox.count; i++){
+            if (inbox.messages[i].Time == keys[index-1]){
+              inbox.messages[i].Comments.push({"Originator": me.user_name, "Comment": split[2]});    
+            }
+          }          
+        }
+        else{
+          var message = {"Time" : d.getTime(), "MessageID":messageid, "Originator": me.user_name, "Text": req.body.message, "Comments": []}
+          me.want[me.uuid] = me.m_count;
+          me.m_count = me.m_count + 1;
 
 
 
-        inbox.messages[inbox.count] = message;
-        inbox.count = inbox.count + 1;
+          inbox.messages[inbox.count] = message;
+          inbox.count = inbox.count + 1;  
+        }
 
 
         console.log(inbox);
