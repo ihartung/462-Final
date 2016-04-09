@@ -125,11 +125,11 @@ function sendMsg(){
 			var x = compareWants(peers.peers[i].want, i);
 			console.log(x);
 			if(x!=false){
-				for(j=0; j < messages.count; j++){
-					if(messages.messages[j].MessageID == x){
+				for(j=0; j < inbox.count; j++){
+					if(inbox.messages[j].MessageID == x){
 						var u = peers.peers[i].url;
 						var mu = u + '/message';
-						var full = {"Rumor": messages.messages[j], "Endpoint":me.url};
+						var full = {"Rumor": inbox.messages[j], "Endpoint":me.url};
 
 						console.log("in Rumor in server");
             console.log(peers.peers[i]);
