@@ -82,48 +82,6 @@ function they_are_alive(){
       }
   }
 
-<<<<<<< HEAD
-=======
-		request.post(mu,{
-			headers: {'content-type' : 'application/json'},
-			form : {message : full}
-					}, function(error, response, body){
-						console.log(error);
-					  console.log(body);
-					});
-	}
-	else{
-		//rumor
-		for(i = 0; i < peers.count; i++){
-			var x = compareWants(peers.peers[i].want, i);
-			console.log(x);
-			if(x!=false){
-				for(j=0; j < inbox.count; j++){
-					if(inbox.messages[j].MessageID == x){
-						var u = peers.peers[i].url;
-						var mu = u + '/message';
-						var full = {"Rumor": inbox.messages[j], "Endpoint":me.url};
-
-						console.log("in Rumor in server");
-            console.log(peers.peers[i]);
-						console.log(full);
-						request.post(mu,{
-										headers: {'content-type' : 'application/json'},
-									  form : {message : full}
-									}, function(error, response, body){
-										console.log(error);
-									  console.log(body);
-									});
-					}
-				}
-			}
-		}
-
-
-	}
->>>>>>> 7c016e3d0f5a1589693f2d9447fdb2ac7adbcf92
-}
-
 
 function loop(){
 		//console.log("inloop");
