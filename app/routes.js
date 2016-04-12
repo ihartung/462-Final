@@ -22,6 +22,29 @@ function propogate(m, path){
 }
 
 
+function merge_messages(ms1, ms2){
+  var has = false;
+  var result = ms2;
+  for(i = 0; i < ms1.length; i++){
+    has = false;
+    for(j = 0; j < ms2.length; j++){
+      if(ms1[i].MessageID == ms2[j].MessageID){
+        has = true;
+        break;
+      }
+    }
+    if(!has){
+      result[result.length] = ms1[i];
+    }
+  }
+
+  return result;
+
+
+
+}
+
+
 
 module.exports = function(app) {
 
@@ -165,17 +188,17 @@ ________________________________________________________________________________
         for(i = 0; i < peers.count; i++){
           if(peers.peers[i].user_name == un){
             has_peer = true;
+            break;
           }
-
-
         }
 
 
         if(!has_peer){
-          if(inbox.count == 0){
-            inbox.messages = messages;
-            inbox.count = messages.length;
-          }
+
+
+          inbox.messages = merge_messages(messages, inbox.messages);
+
+          inbox.count = inbox.messages.length;
 
 
           if(messages.length == 0 && inbox.count > 0){
