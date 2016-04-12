@@ -167,8 +167,9 @@ ________________________________________________________________________________
         peers.peers[peers.count] = peer;
         peers.count = peers.count + 1;
 
-        if(inbox.messages.length == 0){
+        if(inbox.count == 0){
           inbox.messages = messages;
+          inbox.count = messages.length;
         }
 
         console.log(peers);
@@ -184,22 +185,34 @@ ________________________________________________________________________________
             //var u = req.body.peer;
             console.log("post/request");
 
-            var url = JSON.stringify(req.body.peer).replace(/\"/g, "");
-            var mu = url + "/peer";
+            var name = JSON.stringify(req.body.peer).replace(/\"/g, "");
+            var inform = {};
 
-            var req = {"url":me.url, "user_name":me.user_name};
+            for (i=0; i<requests.count; i++) {
+              if(name == requests.contacts[i].user_name){
 
-            request.post(mu,{
-        			headers: {'content-type' : 'application/json'},
-        			form : {request : req}
-        					}, function(error, response, body){
-        						console.log(error);
-        					  console.log(body);
-        			});
+                url = request.contacts[i].url + "/peer";
 
-          var peer = {"url" : url, "user_name": un};
+                inform["user_name"] = me.user_name;
+                inform["url"] = me.url;
+                inform["messages"] = inbox.messages;
 
-            console.log(peers);
+                request.post(url,{
+            			headers: {'content-type' : 'application/json'},
+            			form : {info : inform}
+            					}, function(error, response, body){
+            						console.log(error);
+            					  console.log(body);
+            			});
+
+                  peers.peers[peers.count] = requests.contacts[i];
+                  requests.contacts.splice(i, 1);
+
+                  break;
+
+              }
+
+          }
 
             res.redirect('/');
 
@@ -215,7 +228,7 @@ ________________________________________________________________________________
         var url = JSON.stringify(req.body.peer).replace(/\"/g, "");
         var mu = "http://" + url + "/request/receive";
 
-        var req = {"url":me.url, "name", me.user_name};
+        var req = {"url":me.url, "user_name", me.user_name};
 
         request.post(mu,{
     			headers: {'content-type' : 'application/json'},
