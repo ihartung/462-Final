@@ -156,21 +156,52 @@ ________________________________________________________________________________
         console.log("post/peer");
 
         var url = JSON.stringify(req.body.info.url).replace(/\"/g, "");
-        var murl = "http://" + url;
         var un = JSON.stringify(req.body.info.user_name).replace(/\"/g, "");
 
         var messages = JSON.stringify(req.body.info.messages).replace(/\"/g, "")
 
+        var has_peer = false;
+
+        for(i = 0; i < peers.count; i++){
+          if(peers.peers[i].user_name == un){
+            has_peer = true;
+          }
 
 
-        var peer = {"url" : murl, "user_name": un};
+        }
+
+
+        if(!has_peer){
+          if(inbox.count == 0){
+            inbox.messages = messages;
+            inbox.count = messages.length;
+          }
+
+
+          if(messages.length == 0 && inbox.count > 0){
+
+            var inform = {};
+
+            inform["user_name"] = me.user_name;
+            inform["url"] = me.url;
+            inform["messages"] = inbox.messages;
+
+            ourl = url + "/peer";
+
+            request.post(ourl,{
+              headers: {'content-type' : 'application/json'},
+              form : {info : inform}
+                  }, function(error, response, body){
+                    console.log(error);
+                    console.log(body);
+              });
+          }
+
+
+        var peer = {"url" : url, "user_name": un};
         peers.peers[peers.count] = peer;
         peers.count = peers.count + 1;
-
-        if(inbox.count == 0){
-          inbox.messages = messages;
-          inbox.count = messages.length;
-        }
+      }
 
         console.log(peers);
 
@@ -204,9 +235,6 @@ ________________________________________________________________________________
             						console.log(error);
             					  console.log(body);
             			});
-
-                  peers.peers[peers.count] = requests.contacts[i];
-                  requests.contacts.splice(i, 1);
 
                   break;
 
