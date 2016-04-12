@@ -1,6 +1,8 @@
 // app/routes.js
 var fs = require("fs");
 var request = require("request");
+var $ = require('jquery');
+var MsTranslator = require('mstranslator');
 
 
 module.exports = function(app) {
@@ -13,7 +15,8 @@ module.exports = function(app) {
           res.render('profile.ejs',{
               user_name: me.user_name,
               list: inbox,
-              users: peers
+              users: peers,
+              text: translation
           });
         }
         else res.render('index.ejs'); // load the index.ejs file
@@ -39,7 +42,32 @@ module.exports = function(app) {
 
         res.redirect('/');
 
+
     });
+
+    app.post('/translate', function(req,res) {
+      var str = req.body.string;
+      console.log(str);
+
+      var client = new MsTranslator({
+        client_id: "matt0911"
+        , client_secret: "yAwirsSv8D9zGCBCamjLOtTvnYFdw7jFaAdrkdCCsRs="
+      }, true);
+
+      var params = {
+        text: str
+        , from: 'en'
+        , to: 'es'
+      };
+
+      // Don't worry about access token, it will be auto-generated if needed.
+      client.translate(params, function(err, data) {
+        console.log(data);
+        translation = "<p>Translation is: " + data + "</p>";
+        res.redirect('/');
+      });
+
+    })
 
     //add local message
     app.post('/local/message', function(req, res){
@@ -69,6 +97,28 @@ module.exports = function(app) {
             }
           }          
         }
+        else if (split[0] == 'delete'){
+          var index = split[1];
+          var msgMap = {};
+          for (i = 0; i < inbox.count; i++){
+              var m = inbox.messages[i];
+              msgMap[m.Time] = m;
+          }
+
+          var keys = Object.keys(msgMap);
+          keys = keys.sort();
+          var m = msgMap[keys[index-1]];
+          console.log(inbox);
+          for (i = 0; i < inbox.count; i++){
+            console.log(inbox.messages[i]);
+            if (inbox.messages[i].Time == keys[index-1]){
+              inbox.messages.splice(i,1);
+              inbox.count = inbox.count - 1;
+            }
+          }
+          console.log('after delete');
+          console.log(inbox);
+        }
         else{
           var message = {"Time" : d.getTime(), "MessageID":messageid, "Originator": me.user_name, "Text": req.body.message, "Comments": []}
           me.want[me.uuid] = me.m_count;
@@ -79,10 +129,6 @@ module.exports = function(app) {
           inbox.messages[inbox.count] = message;
           inbox.count = inbox.count + 1;  
         }
-
-
-        console.log(inbox);
-        console.log(me.want);
 
         res.redirect('/');
     });
