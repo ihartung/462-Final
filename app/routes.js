@@ -1,6 +1,8 @@
 // app/routes.js
 var fs = require("fs");
 var request = require("request");
+var $ = require('jquery');
+var MsTranslator = require('mstranslator');
 
 
 
@@ -56,13 +58,12 @@ module.exports = function(app) {
           res.render('profile.ejs',{
               user_name: me.user_name,
               list: inbox,
-              users: peers
+              users: peers,
+              text: translation
           });
         }
         else res.render('index.ejs'); // load the index.ejs file
     });
-
-_______________________________________________________________________________________
 
 
   app.post('/', function(req, res) {
@@ -84,9 +85,34 @@ ________________________________________________________________________________
 
         res.redirect('/');
 
+
     });
 
-_______________________________________________________________________________________
+
+    app.post('/translate', function(req,res) {
+      var str = req.body.string;
+      console.log(str);
+
+      var client = new MsTranslator({
+        client_id: "matt0911"
+        , client_secret: "yAwirsSv8D9zGCBCamjLOtTvnYFdw7jFaAdrkdCCsRs="
+      }, true);
+
+      var params = {
+        text: str
+        , from: 'en'
+        , to: 'es'
+      };
+
+      // Don't worry about access token, it will be auto-generated if needed.
+      client.translate(params, function(err, data) {
+        console.log(data);
+        translation = "<p>Translation is: " + data + "</p>";
+        res.redirect('/');
+      });
+
+    })
+
 
     //add local message
     app.post('/local/message', function(req, res){
@@ -95,26 +121,93 @@ ________________________________________________________________________________
         console.log("post/local/message");
 
         var messageid = me.uuid + ":" + me.m_count;
-        var message = {"MessageID":messageid, "Originator": me.user_name, "Text": req.body.message}
-        me.want[me.uuid] = me.m_count;
-        me.m_count = me.m_count + 1;
+        var d = new Date();
+        var str = req.body.message;
+        var split = str.split(':');
+        console.log(split);
+        if(split[0] == 'comment'){
+          var index = split[1];
+          var msgMap = {};
+          for (i = 0; i < inbox.count; i++){
+              var m = inbox.messages[i];
+              msgMap[m.Time] = m;
+          }
+
+          var keys = Object.keys(msgMap);
+          keys = keys.sort();
+          var m = msgMap[keys[index-1]];
+          for (i = 0; i < inbox.count; i++){
+            if (inbox.messages[i].Time == keys[index-1]){
+              inbox.messages[i].Comments.push({"Originator": me.user_name, "Comment": split[2]});    
+            }
+          }
+          propogate(m, '/comment');
+        }
+        else if (split[0] == 'delete'){
+          var index = split[1];
+          var msgMap = {};
+          for (i = 0; i < inbox.count; i++){
+              var m = inbox.messages[i];
+              msgMap[m.Time] = m;
+          }
+
+          var keys = Object.keys(msgMap);
+          keys = keys.sort();
+          var m = msgMap[keys[index-1]];
+          var deletedMsg = [];
+          
+          for (i = 0; i < inbox.count; i++){
+            
+            if (inbox.messages[i].Time == keys[index-1]){
+              deletedMsg = inbox.messages.splice(i,1);
+              inbox.count = inbox.count - 1;
+            }
+          }
+          propogate(deletedMsg[0], '/delete');
+          console.log('after delete');
+          console.log(inbox);
+        }
+        else{
+          var message = {"Time" : d.getTime(), "MessageID":messageid, "Originator": me.user_name, "Text": req.body.message, "Comments": []}
+          me.want[me.uuid] = me.m_count;
+          me.m_count = me.m_count + 1;
 
 
-
-        inbox.messages[inbox.count] = message;
-        inbox.count = inbox.count + 1;
-
-        propogate(message, "/message");
+          //propogate(message, "/message");
 
 
-        console.log(inbox);
-        console.log(me.want);
+          inbox.messages[inbox.count] = message;
+          inbox.count = inbox.count + 1;  
+        }
 
         res.redirect('/');
     });
 
 
-_______________________________________________________________________________________
+    app.post('/delete', function(req,res) {
+      console.log('/delete');
+      var m = req.body.message;
+      var id = m.MessageID;
+      for (i = 0; i < inbox.count; i++){     
+        if (inbox.messages[i].MessageID == id){
+          inbox.messages.splice(i,1);
+          inbox.count = inbox.count - 1;
+        }
+      }
+    });
+
+
+    app.post('/comment', function(req,res) {
+      console.log('/comment');
+      var m = req.body.message;
+      var id = m.MessageID;
+      for (i = 0; i < inbox.count; i++){     
+        if (inbox.messages[i].MessageID == id){
+          inbox.messages[i] = m;
+        }
+      }
+    });
+
 
     //add message from other peer
     app.post('/message', function(req, res){
@@ -159,7 +252,7 @@ ________________________________________________________________________________
             inbox.messages.push(message);
             inbox.count = inbox.count + 1;
 
-            propogate(message, "/message");
+            //propogate(message, "/message");
           }
 
           console.log(inbox);
@@ -171,7 +264,6 @@ ________________________________________________________________________________
 
     });
 
-_______________________________________________________________________________________
 
     //add a peer
     app.post('/peer', function(req, res){
@@ -211,7 +303,7 @@ ________________________________________________________________________________
 
             ourl = url + "/peer";
 
-            request.post(ourl,{
+            request.post({url:ourl,
               headers: {'content-type' : 'application/json'},
               form : {info : inform}
                   }, function(error, response, body){
@@ -232,7 +324,6 @@ ________________________________________________________________________________
 
     });
 
-    _______________________________________________________________________________________
 
         //send an accept
         app.post('/accept', function(req, res){
@@ -251,7 +342,7 @@ ________________________________________________________________________________
                 inform["url"] = me.url;
                 inform["messages"] = inbox.messages;
 
-                request.post(url,{
+                request.post({url: url,
             			headers: {'content-type' : 'application/json'},
             			form : {info : inform}
             					}, function(error, response, body){
@@ -269,7 +360,6 @@ ________________________________________________________________________________
 
         });
 
-_______________________________________________________________________________________
 
     //send a request
     app.post('/request/send', function(req, res){
@@ -279,9 +369,9 @@ ________________________________________________________________________________
         var url = JSON.stringify(req.body.peer).replace(/\"/g, "");
         var mu = "http://" + url + "/request/receive";
 
-        var req = {"url":me.url, "user_name", me.user_name};
+        var req = {"url":me.url, "user_name": me.user_name};
 
-        request.post(mu,{
+        request.post({url:mu,
     			headers: {'content-type' : 'application/json'},
     			form : {request : req}
     					}, function(error, response, body){
@@ -295,24 +385,23 @@ ________________________________________________________________________________
 
     });
 
-_______________________________________________________________________________________
 
     //receive a request
     app.post('/request/receive', function(req, res){
         //var u = req.body.peer;
         console.log("post/request");
 
+        console.log(req);
         var request = req.body.request;
 
         requests.contacts[requests.count] = request;
         requests.count = requests.count + 1;
-
+        console.log(requests);
 
         res.redirect('/');
 
     });
 
-_______________________________________________________________________________________
 
     //Listen for Heartbeat
     app.post('/alive', function(req, res){

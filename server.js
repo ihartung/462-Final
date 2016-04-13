@@ -2,7 +2,7 @@
 
 // set up ======================================================================
 // get all the tools we need
-var fs = require('fs');
+var fs = require('fs'); 
 var express  = require('express');
 var http = require('http')
 var app      = express();
@@ -19,10 +19,11 @@ var myuuid = uuid.v1();
 
 //me will eventually have a url and name field
 global.me = { "m_count":0,"uuid": myuuid , "want":{} };
-global.inbox = {"count":0, "messages":[]}
-global.peers = {"count":0, "peers":[]};
+global.inbox = {"count":1, "messages":[{"Time" : Date.now(), "MessageID":(myuuid + ":" + "1"), "Originator": "Isaac", "Text": "Did you finish the assignment?", "Comments": []}]};
+global.peers = {"count":1, "peers":[{"url":"localhost:2000","user_name":"Isaac"}]};
 global.requests = {"count":0, "contacts":[]};
 global.heartbeats = {};
+global.translation = '';
 
 // set up our express application
 app.use(morgan('dev')); // log every request to the console
@@ -45,25 +46,24 @@ console.log('The magic happens on port ' + 80);
 loop();
 
 
-function im_alive(){
-  var d = new Date();
-  var ts = d.getTime();
-  var hb = {"url":me.url, "time_stamp":ts};
+ function im_alive(){
+// 	var d = new Date();
+// 	var ts = d.getTime();
+// 	var hb = {"url":me.url, "time_stamp":ts};
 
-  for (i=0; i<peers.count; i++) {
-    var url = peers.peers[i].url;
+// 	for (i=0; i<peers.count; i++) {
+// 	    var url = peers.peers[i].url;
 
-    request.post(url,{
-			headers: {'content-type' : 'application/json'},
-			form : {message : hb}
-					}, function(error, response, body){
-						console.log(error);
-					  console.log(body);
-					});
+// 	    request.post(url,{
+// 			headers: {'content-type' : 'application/json'},
+// 			form : {message : hb}
+// 		}, function(error, response, body){
+// 						console.log(error);
+// 						console.log(body);
+// 					});
 
-}
-
-}
+// 	}
+ }
 
 
 function they_are_alive(){
@@ -72,7 +72,6 @@ function they_are_alive(){
 
   for (var key in heartbeats) {
       var ots = heartbeats[key];
-
       //if I haven't hear a heartbeat in 6 seconds
       if((ts-ots)<6000){
         for (i=0; i<peers.count; i++) {
@@ -81,6 +80,7 @@ function they_are_alive(){
               }
       }
   }
+}
 
 
 function loop(){
