@@ -19,8 +19,8 @@ var myuuid = uuid.v1();
 
 //me will eventually have a url and name field
 global.me = { "m_count":0,"uuid": myuuid , "want":{} };
-global.inbox = {"count":1, "messages":[{"Time" : Date.now(), "MessageID":(myuuid + ":" + "1"), "Originator": "Isaac", "Text": "Did you finish the assignment?", "Comments": []}]};
-global.peers = {"count":1, "peers":[{"url":"localhost:2000","user_name":"Isaac"}]};
+global.inbox = {"count":0, "messages":[]};
+global.peers = {"count":0, "peers":[]};
 global.requests = {"count":0, "contacts":[]};
 global.heartbeats = {};
 global.translation = '';
@@ -47,22 +47,22 @@ loop();
 
 
  function im_alive(){
-// 	var d = new Date();
-// 	var ts = d.getTime();
-// 	var hb = {"url":me.url, "time_stamp":ts};
+ 	var d = new Date();
+ 	var ts = d.getTime();
+ 	var hb = {"url":me.url, "time_stamp":ts};
 
-// 	for (i=0; i<peers.count; i++) {
-// 	    var url = peers.peers[i].url;
+ 	for (i=0; i<peers.count; i++) {
+ 	    var url = peers.peers[i].url;
 
-// 	    request.post(url,{
-// 			headers: {'content-type' : 'application/json'},
-// 			form : {message : hb}
-// 		}, function(error, response, body){
-// 						console.log(error);
-// 						console.log(body);
-// 					});
+ 	    request.post(url,{
+ 			headers: {'content-type' : 'application/json'},
+ 			form : {message : hb}
+ 		}, function(error, response, body){
+ 						console.log(error);
+ 						console.log(body);
+ 					});
 
-// 	}
+ 	}
  }
 
 
