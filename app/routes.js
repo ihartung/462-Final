@@ -140,7 +140,8 @@ module.exports = function(app) {
             if (inbox.messages[i].Time == keys[index-1]){
               inbox.messages[i].Comments.push({"Originator": me.user_name, "Comment": split[2]});    
             }
-          }          
+          }
+          propogate(m, '/comment');
         }
         else if (split[0] == 'delete'){
           var index = split[1];
@@ -153,14 +154,16 @@ module.exports = function(app) {
           var keys = Object.keys(msgMap);
           keys = keys.sort();
           var m = msgMap[keys[index-1]];
-          console.log(inbox);
+          var deletedMsg = [];
+          
           for (i = 0; i < inbox.count; i++){
-            console.log(inbox.messages[i]);
+            
             if (inbox.messages[i].Time == keys[index-1]){
-              inbox.messages.splice(i,1);
+              deletedMsg = inbox.messages.splice(i,1);
               inbox.count = inbox.count - 1;
             }
           }
+          propogate(deletedMsg[0], '/delete');
           console.log('after delete');
           console.log(inbox);
         }
@@ -170,7 +173,7 @@ module.exports = function(app) {
           me.m_count = me.m_count + 1;
 
 
-        propogate(message, "/message");
+          //propogate(message, "/message");
 
 
           inbox.messages[inbox.count] = message;
@@ -180,6 +183,30 @@ module.exports = function(app) {
         res.redirect('/');
     });
 
+
+    app.post('/delete', function(req,res) {
+      console.log('/delete');
+      var m = req.body.message;
+      var id = m.MessageID;
+      for (i = 0; i < inbox.count; i++){     
+        if (inbox.messages[i].MessageID == id){
+          inbox.messages.splice(i,1);
+          inbox.count = inbox.count - 1;
+        }
+      }
+    });
+
+
+    app.post('/comment', function(req,res) {
+      console.log('/comment');
+      var m = req.body.message;
+      var id = m.MessageID;
+      for (i = 0; i < inbox.count; i++){     
+        if (inbox.messages[i].MessageID == id){
+          inbox.messages[i] = m;
+        }
+      }
+    });
 
 
     //add message from other peer
@@ -225,7 +252,7 @@ module.exports = function(app) {
             inbox.messages.push(message);
             inbox.count = inbox.count + 1;
 
-            propogate(message, "/message");
+            //propogate(message, "/message");
           }
 
           console.log(inbox);
@@ -276,7 +303,7 @@ module.exports = function(app) {
 
             ourl = url + "/peer";
 
-            request.post(ourl,{
+            request.post({url:ourl,
               headers: {'content-type' : 'application/json'},
               form : {info : inform}
                   }, function(error, response, body){
@@ -315,7 +342,7 @@ module.exports = function(app) {
                 inform["url"] = me.url;
                 inform["messages"] = inbox.messages;
 
-                request.post(url,{
+                request.post({url: url,
             			headers: {'content-type' : 'application/json'},
             			form : {info : inform}
             					}, function(error, response, body){
@@ -342,9 +369,9 @@ module.exports = function(app) {
         var url = JSON.stringify(req.body.peer).replace(/\"/g, "");
         var mu = "http://" + url + "/request/receive";
 
-        var req = {"url":me.url, "user_name", me.user_name};
+        var req = {"url":me.url, "user_name": me.user_name};
 
-        request.post(mu,{
+        request.post({url:mu,
     			headers: {'content-type' : 'application/json'},
     			form : {request : req}
     					}, function(error, response, body){
@@ -364,11 +391,12 @@ module.exports = function(app) {
         //var u = req.body.peer;
         console.log("post/request");
 
+        console.log(req);
         var request = req.body.request;
 
         requests.contacts[requests.count] = request;
         requests.count = requests.count + 1;
-
+        console.log(requests);
 
         res.redirect('/');
 

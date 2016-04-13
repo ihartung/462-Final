@@ -47,12 +47,12 @@
 
                 }
 
+                console.log(peers);
                 if(peers.count != 0){
-                    $('#peersDiv').html("<h4>Peers</h4>");
-                    var peerMap = {};
+                    $('#peerDiv').html("<h4>Peers</h4>");
                     for (i = 0; i < peers.count; i++){
                         var p = peers.peers[i];
-                        $('#peersDiv').append("<p>" + i + "</p>");
+                        $('#peerDiv').append("<p>" + p.user_name + "</p>");
                     }
                 }
 
@@ -60,25 +60,24 @@
                   url : "http://api.wunderground.com/api/23ba53aeb4aa84ee/geolookup/conditions/q/UT/Provo.json",
                   dataType : "jsonp",
                   success : function(parsed_json) {
-                    console.log(parsed_json);
                     var location = parsed_json['location']['city'];
                     var temp_f = parsed_json['current_observation']['temp_f'];
                     //alert("Current temperature in " + location + " is: " + temp_f);
                     $('#weatherDiv').html("<p>Current temperature in " + location + " is: " + temp_f + "</p>");
+
+                    $.ajax({
+                      url : "http://api.wunderground.com/api/23ba53aeb4aa84ee/forecast/geolookup/conditions/q/UT/Provo.json",
+                      dataType : "jsonp",
+                      success : function(parsed_json) {
+                        var cond = parsed_json['forecast']['simpleforecast']['forecastday'][1]['conditions'];
+                        var temp_f = parsed_json['forecast']['simpleforecast']['forecastday'][1]['high']['fahrenheit'];
+                        //alert("Current temperature in " + location + " is: " + temp_f);
+                        $('#weatherDiv').append("<p>Forecast for tomorrow is " + cond + " and a high of " + temp_f + "</p>");
+                      }
+                    });
                   }
                 });
 
-                $.ajax({
-                  url : "http://api.wunderground.com/api/23ba53aeb4aa84ee/forecast/geolookup/conditions/q/UT/Provo.json",
-                  dataType : "jsonp",
-                  success : function(parsed_json) {
-                    console.log(parsed_json);
-                    var cond = parsed_json['forecast']['simpleforecast']['forecastday'][1]['conditions'];
-                    var temp_f = parsed_json['forecast']['simpleforecast']['forecastday'][1]['high']['fahrenheit'];
-                    //alert("Current temperature in " + location + " is: " + temp_f);
-                    $('#weatherDiv').append("<p>Forecast for tomorrow is " + cond + " and a high of " + temp_f + "</p>");
-                  }
-                });
 
                 $('#translateDiv').html("<p>" + translation + "</p>");
          });
@@ -105,7 +104,7 @@
                         <button type="submit" class="btn btn-warning btn-lg">Send</button>
                     </form>
                     <textarea class="form-control" rows="5" id="comment" name="message" form="mform">Enter message here...</textarea>
-                    <form action="/peer" method="post">
+                    <form action="/request/send" method="post">
                         <div class="form-group">
                             <label>Add New Peer</label>
                             <input type="text" class="form-control" name="peer">
@@ -129,6 +128,7 @@
                 <h3>Weather in Provo</h3>
                 <div id="weatherDiv">Problem connecting to Weather.com</div>
             </div>
+            <br>
             <div id="translate">
                 <h3>Translation Center</h3>
                 <form action="/translate" method="post">
