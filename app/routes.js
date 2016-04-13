@@ -173,7 +173,7 @@ module.exports = function(app) {
           me.m_count = me.m_count + 1;
 
 
-          //propogate(message, "/message");
+          propogate(message, "/message");
 
 
           inbox.messages[inbox.count] = message;
@@ -252,7 +252,7 @@ module.exports = function(app) {
             inbox.messages.push(message);
             inbox.count = inbox.count + 1;
 
-            //propogate(message, "/message");
+            propogate(message, "/message");
           }
 
           console.log(inbox);
